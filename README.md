@@ -1,3 +1,5 @@
+Below is an AI-generated Readme for reference which is in lines with the project: 
+
 Skip the unnecessary parts. Save what matters. Replay only what you need.
 
 
