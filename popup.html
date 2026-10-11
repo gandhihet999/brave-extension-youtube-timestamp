@@ -1,0 +1,184 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Segment Jumper</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      width: 370px;
+      padding: 15px;
+      margin: 0;
+      color: #f5f5f5;
+      background: #181818;
+      font: 13px system-ui, sans-serif;
+    }
+
+    h1 { font-size: 19px; margin: 0; }
+    h2 { font-size: 14px; margin: 15px 0 8px; }
+    p { color: #aaa; line-height: 1.4; }
+    button, input, textarea { font: inherit; }
+
+    button {
+      border: 1px solid #484848;
+      border-radius: 7px;
+      background: #292929;
+      color: white;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #3b3b3b; }
+    button.primary {
+      background: #ff0033;
+      border-color: #ff0033;
+      font-weight: 650;
+    }
+
+    button:disabled { opacity: .45; cursor: default; }
+
+    input, textarea {
+      width: 100%;
+      min-width: 0;
+      color: white;
+      background: #242424;
+      border: 1px solid #505050;
+      border-radius: 6px;
+      padding: 8px;
+    }
+
+    input[type="range"] { padding: 0; accent-color: #ff0033; }
+    label { display: block; color: #ccc; margin-bottom: 5px; }
+    .muted { color: #999; }
+    .row { display: flex; align-items: center; gap: 7px; }
+    .row > * { flex: 1; }
+    .header { margin-bottom: 12px; }
+    .panel {
+      border: 1px solid #383838;
+      border-radius: 9px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .title {
+      font-weight: 650;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .small { font-size: 11px; }
+    .time-labels {
+      display: flex;
+      justify-content: space-between;
+      color: #999;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .segment {
+      padding: 9px 0;
+      border-bottom: 1px solid #383838;
+    }
+    .segment:last-child { border-bottom: 0; }
+    .segment-title { font-weight: 600; }
+    .segment-actions { display: flex; gap: 5px; margin-top: 6px; }
+    .segment-actions button { flex: 1; padding: 6px 4px; }
+    .comment {
+      padding: 9px 0;
+      border-bottom: 1px solid #383838;
+    }
+    .comment:last-child { border-bottom: 0; }
+    .comment-text {
+      color: #ccc;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      margin: 5px 0;
+    }
+    .checkrow { display: flex; align-items: start; gap: 7px; }
+    .checkrow input { width: auto; margin-top: 3px; }
+    #status { min-height: 18px; font-size: 12px; }
+    #videoTitle { margin-top: 7px; }
+    #commentResults { max-height: 220px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="header row">
+    <div style="flex:1">
+      <h1>▶ Segment Jumper</h1>
+      <div class="muted small">Your personal video highlights</div>
+    </div>
+    <button id="refresh" title="Refresh video information">↻</button>
+  </div>
+
+  <div class="panel">
+    <div id="videoTitle" class="title">Detecting video…</div>
+    <p id="videoMeta" class="small">Waiting for YouTube player</p>
+
+    <label for="playhead">Video timeline</label>
+    <input id="playhead" type="range" min="0" max="1" value="0">
+    <div class="time-labels">
+      <span id="currentTime">00:00</span>
+      <span id="duration">00:00</span>
+    </div>
+    <button id="seek" style="width:100%;margin-top:7px">
+      Seek to timeline position
+    </button>
+  </div>
+
+  <div class="panel">
+    <h2 style="margin-top:0">Create a segment</h2>
+    <div class="row">
+      <div>
+        <label for="start">Start time</label>
+        <input id="start" value="00:00" placeholder="MM:SS">
+        <button id="setStart" style="width:100%;margin-top:5px">
+          Use current time
+        </button>
+      </div>
+      <div>
+        <label for="end">End time</label>
+        <input id="end" value="00:30" placeholder="MM:SS">
+        <button id="setEnd" style="width:100%;margin-top:5px">
+          Use current time
+        </button>
+      </div>
+    </div>
+    <label for="segmentName" style="margin-top:10px">Segment name (optional)</label>
+    <input id="segmentName" placeholder="e.g. Important explanation">
+    <button id="add" class="primary" style="width:100%;margin-top:9px">
+      + Add segment
+    </button>
+    <p class="small">Times accept MM:SS or HH:MM:SS. Example: 110:15.</p>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <h2 style="margin:0;flex:1">Saved segments</h2>
+      <button id="save">Save</button>
+    </div>
+    <div id="segments"></div>
+    <div class="row" style="margin-top:9px">
+      <button id="play" class="primary">▶ Play all</button>
+      <button id="stop">■ Stop</button>
+    </div>
+    <p id="savedStatus" class="small">Segments are saved locally per video.</p>
+  </div>
+
+  <div class="panel">
+    <h2 style="margin-top:0">Import from comments</h2>
+    <p class="small">
+      Scans comments currently loaded on this YouTube page.
+      Review matches before importing them.
+    </p>
+    <button id="scan" style="width:100%">Find timestamp ranges</button>
+    <div id="commentResults"></div>
+    <button id="import" class="primary" style="width:100%;margin-top:8px" disabled>
+      Import selected ranges
+    </button>
+  </div>
+
+  <div id="status" role="status" aria-live="polite"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

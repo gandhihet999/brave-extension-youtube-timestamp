@@ -1,0 +1,25 @@
+
+{
+  "manifest_version": 3,
+  "name": "YouTube Segment Jumper",
+  "version": "2.0.0",
+  "description": "Save, select, import, and play YouTube video segments.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "YouTube Segment Jumper",
+    "default_popup": "popup.html"
+  }
+}
